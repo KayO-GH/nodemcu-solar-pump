@@ -69,7 +69,11 @@ void handleRoot() {
       "<H2>Control DashBoard</H2>"
       "<br />"
       "<h2>Pump Speed:</h2>"
-      "<h1>"+String(mappedValue)+"</h1>"
+      "<h1>"+String(mappedValue)+"/100</h1>"
+      "<a href=\"/\">Refresh</a>"
+      "<br/>"
+      "<br/>"
+      "<br/>"
       "<a href=\"/?pump=1\">Turn On Pump</a>"
       "<a href=\"/?pump=0\">Turn Off Pump</a><br />"
       "<br />"
@@ -78,7 +82,8 @@ void handleRoot() {
     "</BODY>"
   "</HTML>");
   int pumpState = server.arg("pump").toInt();
-  manualOff = !pumpState;//set global bolean variable
+  if(server.hasArg("pump"))
+    manualOff = !pumpState;//set global bolean variable
   digitalWrite(vrPin, pumpState);
 }  
 
@@ -102,8 +107,13 @@ void loop() {
   // put your main code here, to run repeatedly:
   yield();
   server.handleClient();//run webpage first
+  Serial.print("manual off state");
+  Serial.println(manualOff);
   if(manualOff){
     return;
+  }else{
+    digitalWrite(vrPin, HIGH);
+    yield();
   }
 
   yield();
@@ -135,4 +145,5 @@ void loop() {
     digitalWrite(vrPin, HIGH);//simulate connect
     yield();
   }
+
 }
