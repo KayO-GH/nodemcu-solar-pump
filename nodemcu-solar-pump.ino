@@ -1,3 +1,11 @@
+/*
+ *Code to control sensorless pump driver from ESP NodeMCU 
+ *Maxim Nyansa IT Solutions
+ *28th July, 2018
+ *
+ *Note that yield() function is called multiple times to allow ESP to handle WiFi state 
+ *without a break in code
+ */
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -7,15 +15,28 @@ const char *password = "12345678";
 
 ESP8266WebServer server(80);
 
-int signalPin = A0;
-int vrPin = 2;
+int signalPin = A0;//connect signal pin of driver board to A0 on the ESP NodeMCU
+//NOTE: the A0 pin takes a maximum of 3.3V
+//the signal pin might have to be passed through a voltage divider if it works at 5V
+
+int vrPin = 2;//connect VR pin of driver board to pin D4 of ESP board.
+//D4 corresponds to GPIO pin 2
+
 int delayLength = 2000;//delay length in milliseconds - should be 5 mins
-int airBubblesThreshold = 50;// threshhold for pumping of air bubbles
-int manualOff = 0;//boolen value
-int mappedValue = 0;
+//this is the time to wait before attempting to switch on the pump after encountering air bubbles
 
+int airBubblesThreshold = 50;// threshhold speed for pumping of air bubbles
+//This should be tested and the appropriate value assigned to the variable airBubblesThreshold
 
+int manualOff = 0;//boolen value to tell if pump was manually turned off
+
+int mappedValue = 0;//global variable for storing mapped value of pump speed
+
+/*
+ * decfine function handleRoot to render page displaying current pump speed
+ */
 void handleRoot() {
+  //render HTML page to screen
   server.send(200, "text/html", 
     "<!DOCTYPE html>"
     "<HEAD>"
@@ -23,116 +44,101 @@ void handleRoot() {
       "<TITLE>Anco Pumps</TITLE>"
       "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
       "<style>"
-      //styling the body
+        //styling the body
         "body{"
-        "margin:0px 0px; padding:0px;"
-        "text-align:center;"
-        "background-color:#fff"
+          "margin:0px 0px; padding:0px;"
+          "text-align:center;"
+          "background-color:#fff"
+          "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
         "}"
-
-       //div which contains the navigation bar
-        ".ancoPumps_container {background-color:#fff;"
-         "padding-top: 5px;"
+  
+         //div which contains the navigation bar
+        ".ancoPumps_container {"
+          "background-color:#fff;"
+          "padding-top: 5px;"
+          "color: #767B7A;"
+          "font_size: 18px;"
+          "margin-bottom: 0px;"
+          "border-bottom: 1px solid #767B7A;"
+        "}"
+           
+        "h1{"
+          "text-align: center;"
+          "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
+        "}"
+          
+        "h2{"
+          "text-align: center;"
+          "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
+        "}"
+          
+        "a{"
+          "text-decoration:none;"
+          "width:75px;"
+          "height:50px;"
+          "border-color:black;"
+          "border-top:2px solid;"
+          "border-bottom:2px solid;"
+          "border-right:2px solid;"
+          "border-left:2px solid;"
+          "border-radius:10px 10px 10px;"
+          "-o-border-radius:10px 10px 10px;"
+          "-webkit-border-radius:10px 10px 10px;"
+          "font-family:\"Trebuchet MS\",Arial, Helvetica, sans-serif;"
+          "-moz-border-radius:10px 10px 10px;"
+          "background-color:#293F5E;"
+          "padding:8px;"
+          "text-align:center;"
+        "}"
+          
+        //Dashboard
+        ".dashboard{"
+         "padding-top: 5px"
+         "padding: 5px;"
          "color: #767B7A;"
-         "font_size: 18px;"
-         "margin-bottom: 0px;"
-         "border-bottom: 1px solid #767B7A;"
-         "}"
-         
-        "h1"
-        "{"
-        "text-align: center;"
-        "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
+         "font-size: 16px;" 
+        "}"
+  
+        //pumpSpeed
+        ".pumpSpeed{"
+          "color:#767B7A;"
+          "font-size:18px;"
+          "padding: 0px;"
         "}"
         
-        "h2"
-        "{"
-        "text-align: center;"
-        "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
+        //pumpValues
+        ".pumpValues{"
+         "color:#000;"
+         "font-size:35px;"
+         "padding: 5px;"
         "}"
         
-        "a"
-        "{"
-        "text-decoration:none;"
-        "width:75px;"
-        "height:50px;"
-        "border-color:black;"
-        "border-top:2px solid;"
-        "border-bottom:2px solid;"
-        "border-right:2px solid;"
-        "border-left:2px solid;"
-        "border-radius:10px 10px 10px;"
-        "-o-border-radius:10px 10px 10px;"
-        "-webkit-border-radius:10px 10px 10px;"
-        "font-family:\"Trebuchet MS\",Arial, Helvetica, sans-serif;"
-        "-moz-border-radius:10px 10px 10px;"
-        "background-color:#293F5E;"
-        "padding:8px;"
-        "text-align:center;"
-        "}"
-        
-    //Dashboard
-           ".dashboard{"
-           "padding-top: 5px"
-            "padding: 5px;"
-           "color: #767B7A;"
-            "font-size: 16px;" 
-         "}"
-    //Pump Container
-//      ".pump_container{"
-//        "background-color: #9A9A9A;"
-//        "width: 50%;"
-//        "margin: 1px auto;"
-//        "margin-bottom: 10px;"
-//        "padding: 10px;"
-//        "border: 1px 1px 1px 1px solid #9A9A9A;"
-//        "border-radius:3px 3px 3px;"
-//        "-o-border-radius:10px 10px 10px;"
-//        "-webkit-border-radius:10px 10px 10px;"   
-      "}"
-    //pumpSpeed
-      ".pumpSpeed{"
-        "color:#767B7A;"
-        "font-size:18px;"
-        "padding: 0px;"
-      "}"
-      
-   //pumpValues
-       ".pumpValues{"
-        "color:#000;"
-        "font-size:35px;"
-        "padding: 5px;"
-      "}"
-      
-    
         ".on{"
           "background-color:#09004A;"
           "padding: 20px;"
           "margin: 10px;"
-          "color: #ffffff;"
-          
+          "color: #ffffff;"     
         "}"
-
+  
         ".off{"
           "background-color:#6B0000;"
           "padding: 20px;"
           "margin: 10px;"
           "color: #ffffff;"
         "}"
-    
-     //Powered by Maxim   
-        ".footer" 
-        "{"
-        "font-size: 16px;"
-        "color: #A6C247;"
-         "position: fixed;"
-         "left: 0;"
-         "bottom: 0;"
-        "width: 100%;"
-        "padding: 5px;"
-        "background-color:#767B7A;"
-       "}"
-       
+      
+        //Powered by Maxim   
+        ".footer{"
+          "font-size: 16px;"
+          "color: #A6C247;"
+          "position: fixed;"
+          "left: 0;"
+          "bottom: 0;"
+          "width: 100%;"
+          "padding: 5px;"
+          "background-color:#767B7A;"
+        "}"
+         
         "a:link {color:white;}"      /* unvisited link */
         "a:visited {color:white;}"  /* visited link */
         "a:hover {color:white;}"  /* mouse over link */
@@ -146,20 +152,18 @@ void handleRoot() {
         "<h1 class=\"ancoPumps\">Anco Pumps</h1>"
         "<h2 class=\"dashboard\">Control DashBoard</h2>"
       "</div>"
-        "<h2 class=\"pumpSpeed\">Pump Speed:</h2>"
+      "<h2 class=\"pumpSpeed\">Pump Speed</h2>"
       "<h1 class=\"pumpValues\" id=\"data\">"
       "</h1>"
-    "<br />""<br />"
-        "<a href=\"/?pump=1\" class=\"on\">Turn On Pump</a>"
-        "<a href=\"/?pump=0\" class=\"off\">Turn Off Pump</a>"
-    "<br />""<br />"
+      "<br />"
+      "<br />"
+      "<a href=\"/?pump=1\" class=\"on\">Turn On Pump</a>"
+      "<a href=\"/?pump=0\" class=\"off\">Turn Off Pump</a>"
+      "<br />""<br />"
 
-    "<div class=\"footer\">"
-      "<p>Powered by Maxim Nyansa</p>"
-    "</div>"
-//      "<script>"
-//        "var x = setInterval(function(){document.getElementById(\"data\").innerHTML = "+String(mappedValue)+"}() , 1000);"
-//      "</script>"
+      "<div class=\"footer\">"
+        "<p>Powered by Maxim Nyansa</p>"
+      "</div>"
 
       "<script>"
         "var x = setInterval(function() {loadData(\"data.txt\",updateData)}, 1000);"
@@ -179,28 +183,35 @@ void handleRoot() {
       "</script>"
     "</BODY>"
   "</HTML>");
+  //extract pump state value from arguments
   int pumpState = server.arg("pump").toInt();
-  if(server.hasArg("pump"))
+  //make sure root url does not produce a false positive
+  if(server.hasArg("pump")){
     manualOff = !pumpState;//set global bolean variable
+  }
+  //write pump state to VR Pin
   digitalWrite(vrPin, pumpState);
 }  
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(115200);
   pinMode(vrPin, OUTPUT);
   Serial.println();
   //setup server
   Serial.print("Configuring access point...");
-  WiFi.softAP(ssid, password);
+  WiFi.softAP(ssid, password);//start WiFi Access Point
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
-  Serial.println(myIP);
+  Serial.println(myIP);//display IP address in serial monitor
+  
+  //call handleRoot function at root url
   server.on("/", handleRoot);
+  
+  //create data.txt page from which AJAX will call pump value
   server.on("/data.txt", [](){
    String text = (String)mappedValue;
    server.send(200, "text/html", text);
- });
+  });
   server.begin();
   Serial.println("HTTP server started");
 }
@@ -208,24 +219,31 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   yield();
-  server.handleClient();//run webpage first
-  Serial.print("manual off state");
-  Serial.println(manualOff);
+  //run webpage
+  server.handleClient();
+  //Serial.print("manual off state");
+  //Serial.println(manualOff);
+
   if(manualOff){
+    //if pump has manually been turned off, return to start of loop
     return;
   }else{
+    //else turn on pump
     digitalWrite(vrPin, HIGH);
     yield();
   }
 
   yield();
+  //read value coming in on signal pin
   int signalValue = analogRead(signalPin);
   yield();
+  //map value to a scale of 0 to 100
   mappedValue = map(signalValue, 0, 1024, 0, 100);
-  //delay(100);
+  //display mapped valuein serial monitor
   Serial.println(mappedValue);
   delay(100);
 
+  //if incoming signal is too low (pump is off), restart pump
   if(mappedValue < 5){
     yield();
     digitalWrite(vrPin, LOW);//simulate disconnect
@@ -238,13 +256,14 @@ void loop() {
     yield();
   }
 
+  //if incoming signal is too high (pump is pumping air), turn off pump
   if(mappedValue > airBubblesThreshold){
     yield();
     digitalWrite(vrPin, LOW);//turn off
     yield();
     delay(delayLength);//wait and attempt to turn on again
     yield();
-    digitalWrite(vrPin, HIGH);//simulate connect
+    digitalWrite(vrPin, HIGH);//turn on
     yield();
   }
 
