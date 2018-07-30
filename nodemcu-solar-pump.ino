@@ -16,25 +16,41 @@ int mappedValue = 0;
 
 
 void handleRoot() {
-  server.send(200, "text/html", "<TITLE>Anco Pumps</TITLE>"
+  server.send(200, "text/html", 
+    "<!DOCTYPE html>"
     "<HEAD>"
-      "<meta name='apple-mobile-web-app-capable' content='yes' />"
-      "<meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />"
+      "<meta charset=\"utf-8\" />"
+      "<TITLE>Anco Pumps</TITLE>"
+      "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
       "<style>"
+      //styling the body
         "body{"
-        "margin:60px 0px; padding:0px;"
+        "margin:0px 0px; padding:0px;"
         "text-align:center;"
+        "background-color:#fff"
         "}"
+
+       //div which contains the navigation bar
+        ".ancoPumps_container {background-color:#fff;"
+         "padding-top: 5px;"
+         "color: #767B7A;"
+         "font_size: 18px;"
+         "margin-bottom: 0px;"
+         "border-bottom: 1px solid #767B7A;"
+         "}"
+         
         "h1"
         "{"
         "text-align: center;"
         "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
         "}"
+        
         "h2"
         "{"
         "text-align: center;"
         "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
         "}"
+        
         "a"
         "{"
         "text-decoration:none;"
@@ -54,6 +70,69 @@ void handleRoot() {
         "padding:8px;"
         "text-align:center;"
         "}"
+        
+    //Dashboard
+           ".dashboard{"
+           "padding-top: 5px"
+            "padding: 5px;"
+           "color: #767B7A;"
+            "font-size: 16px;" 
+         "}"
+    //Pump Container
+//      ".pump_container{"
+//        "background-color: #9A9A9A;"
+//        "width: 50%;"
+//        "margin: 1px auto;"
+//        "margin-bottom: 10px;"
+//        "padding: 10px;"
+//        "border: 1px 1px 1px 1px solid #9A9A9A;"
+//        "border-radius:3px 3px 3px;"
+//        "-o-border-radius:10px 10px 10px;"
+//        "-webkit-border-radius:10px 10px 10px;"   
+      "}"
+    //pumpSpeed
+      ".pumpSpeed{"
+        "color:#767B7A;"
+        "font-size:18px;"
+        "padding: 0px;"
+      "}"
+      
+   //pumpValues
+       ".pumpValues{"
+        "color:#000;"
+        "font-size:35px;"
+        "padding: 5px;"
+      "}"
+      
+    
+        ".on{"
+          "background-color:#09004A;"
+          "padding: 20px;"
+          "margin: 10px;"
+          "color: #ffffff;"
+          
+        "}"
+
+        ".off{"
+          "background-color:#6B0000;"
+          "padding: 20px;"
+          "margin: 10px;"
+          "color: #ffffff;"
+        "}"
+    
+     //Powered by Maxim   
+        ".footer" 
+        "{"
+        "font-size: 16px;"
+        "color: #A6C247;"
+         "position: fixed;"
+         "left: 0;"
+         "bottom: 0;"
+        "width: 100%;"
+        "padding: 5px;"
+        "background-color:#767B7A;"
+       "}"
+       
         "a:link {color:white;}"      /* unvisited link */
         "a:visited {color:white;}"  /* visited link */
         "a:hover {color:white;}"  /* mouse over link */
@@ -63,22 +142,41 @@ void handleRoot() {
       "<TITLE>Anco Pumps</TITLE>"
     "</HEAD>"
     "<BODY>"
-      "<H1>Anco Pumps</H1>"
-      "<hr />"
-      "<br />"
-      "<H2>Control DashBoard</H2>"
-      "<br />"
-      "<h2>Pump Speed:</h2>"
-      "<h1>"+String(mappedValue)+"/100</h1>"
-      "<a href=\"/\">Refresh</a>"
-      "<br/>"
-      "<br/>"
-      "<br/>"
-      "<a href=\"/?pump=1\">Turn On Pump</a>"
-      "<a href=\"/?pump=0\">Turn Off Pump</a><br />"
-      "<br />"
+      "<div class=\"ancoPumps_container\">"
+        "<h1 class=\"ancoPumps\">Anco Pumps</h1>"
+        "<h2 class=\"dashboard\">Control DashBoard</h2>"
+      "</div>"
+        "<h2 class=\"pumpSpeed\">Pump Speed:</h2>"
+      "<h1 class=\"pumpValues\" id=\"data\">"
+      "</h1>"
+    "<br />""<br />"
+        "<a href=\"/?pump=1\" class=\"on\">Turn On Pump</a>"
+        "<a href=\"/?pump=0\" class=\"off\">Turn Off Pump</a>"
+    "<br />""<br />"
+
+    "<div class=\"footer\">"
       "<p>Powered by Maxim Nyansa</p>"
-      "<br />"
+    "</div>"
+//      "<script>"
+//        "var x = setInterval(function(){document.getElementById(\"data\").innerHTML = "+String(mappedValue)+"}() , 1000);"
+//      "</script>"
+
+      "<script>"
+        "var x = setInterval(function() {loadData(\"data.txt\",updateData)}, 1000);"
+        "function loadData(url, callback){"
+          "var xhttp = new XMLHttpRequest();"
+          "xhttp.onreadystatechange = function(){"
+            "if(this.readyState == 4 && this.status == 200){"
+              "callback.apply(xhttp);"
+            "}"
+          "};"
+          "xhttp.open(\"GET\", url, true);"
+          "xhttp.send();"
+        "}"
+        "function updateData(){"
+          "document.getElementById(\"data\").innerHTML = this.responseText;"
+        "}"
+      "</script>"
     "</BODY>"
   "</HTML>");
   int pumpState = server.arg("pump").toInt();
@@ -99,6 +197,10 @@ void setup() {
   Serial.print("AP IP address: ");
   Serial.println(myIP);
   server.on("/", handleRoot);
+  server.on("/data.txt", [](){
+   String text = (String)mappedValue;
+   server.send(200, "text/html", text);
+ });
   server.begin();
   Serial.println("HTTP server started");
 }
