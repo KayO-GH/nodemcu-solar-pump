@@ -54,12 +54,13 @@ void handleRoot() {
   
          //div which contains the navigation bar
         ".ancoPumps_container {"
-          "background-color:#fff;"
+          "background-color:#f8f8f8;"
           "padding-top: 5px;"
-          "color: #767B7A;"
+          "color: #3d3d3d;"
           "font_size: 18px;"
           "margin-bottom: 0px;"
-          "border-bottom: 1px solid #767B7A;"
+          "border-bottom: 1px solid #999;"
+          "box-shadow: 0 0 10px 0 #888"
         "}"
            
         "h1{"
@@ -105,26 +106,41 @@ void handleRoot() {
           "font-size:18px;"
           "padding: 0px;"
         "}"
+
+        //pumpSwitch
+        ".pumpSwitch{"
+          "color:#000;"
+          "font-size:22px;"
+          "padding: 0px;"
+          "margin-bottom: 30px"
+        "}"
         
         //pumpValues
         ".pumpValues{"
          "color:#000;"
-         "font-size:35px;"
-         "padding: 5px;"
+         "font-size:45px;"
+         "font-weight: bold"
+         "background-color: #77777a"
+         "border: 1px 1px 1px 1px solid #77777a"
+         "-o-border-radius:1px 1px 1px;"
+         "-webkit-border-radius:1px 1px 1px;"
+         "border-radius: 50%"
         "}"
         
         ".on{"
           "background-color:#09004A;"
-          "padding: 20px;"
+          "padding: 20px 50px;"
           "margin: 10px;"
-          "color: #ffffff;"     
+          "color: #ffffff;"  
+          "font-size: 1.4em"   
         "}"
   
         ".off{"
           "background-color:#6B0000;"
-          "padding: 20px;"
+          "padding: 20px 50px;"
           "margin: 10px;"
           "color: #ffffff;"
+          "font-size: 1.4em"
         "}"
       
         //Powered by Maxim   
@@ -137,6 +153,7 @@ void handleRoot() {
           "width: 100%;"
           "padding: 5px;"
           "background-color:#767B7A;"
+          "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
         "}"
          
         "a:link {color:white;}"      /* unvisited link */
@@ -152,13 +169,12 @@ void handleRoot() {
         "<h1 class=\"ancoPumps\">Anco Pumps</h1>"
         "<h2 class=\"dashboard\">Control DashBoard</h2>"
       "</div>"
-      "<h2 class=\"pumpSpeed\">Pump Speed</h2>"
+      "<h1 class=\"pumpSpeed\">Pump Speed</h1>"
       "<h1 class=\"pumpValues\" id=\"data\">"
       "</h1>"
-      "<br />"
-      "<br />"
-      "<a href=\"/?pump=1\" class=\"on\">Turn On Pump</a>"
-      "<a href=\"/?pump=0\" class=\"off\">Turn Off Pump</a>"
+      "<h1 class=\"pumpSwitch\">Pump Switch</h1>"
+      "<a href=\"/?pump=1\" class=\"on\">ON</a>"
+      "<a href=\"/?pump=0\" class=\"off\">OFF</a>"
       "<br />""<br />"
 
       "<div class=\"footer\">"
