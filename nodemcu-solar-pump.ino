@@ -114,18 +114,18 @@ void handleRoot() {
           "font-size:24px;"
           "padding: 0px;"
           "margin-bottom: 30px;"
-          "margin-top: 70px;"
+          "margin-top: 40px;"
         "}"
         
         //pumpValues
         ".pumpValues{"
          "color:#fff;"
          "font-size:60px;"
-         "padding: 40px;"
+         "padding: 35px;"
          "font-weight: bold;"
          "background-color:#77777a;"
          "width: 80px;"
-         "margin: 20px auto;"
+         "margin: 12px auto;"
          "border-radius: 50%;"
         "}"
  
