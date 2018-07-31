@@ -46,9 +46,10 @@ void handleRoot() {
       "<style>"
         //styling the body
         "body{"
-          "margin:0px 0px; padding:0px;"
+          "margin:0px;"
+          "padding:0px;"
           "text-align:center;"
-          "background-color:#fff"
+          "background-color:#fff;"
           "font-family:Arial, \"Trebuchet MS\", Helvetica, sans-serif;"
         "}"
   
@@ -57,10 +58,10 @@ void handleRoot() {
           "background-color:#f8f8f8;"
           "padding-top: 5px;"
           "color: #3d3d3d;"
-          "font_size: 18px;"
+          "font-size: 20px;"
           "margin-bottom: 0px;"
           "border-bottom: 1px solid #999;"
-          "box-shadow: 0 0 10px 0 #888"
+          "box-shadow: 0 0 10px 0 #888;"
         "}"
            
         "h1{"
@@ -94,53 +95,54 @@ void handleRoot() {
           
         //Dashboard
         ".dashboard{"
-         "padding-top: 5px"
+         "padding-top: 5px;"
          "padding: 5px;"
-         "color: #767B7A;"
-         "font-size: 16px;" 
+         "color: #3d3d3d;"
+         "font-size: 18px;" 
         "}"
   
         //pumpSpeed
         ".pumpSpeed{"
-          "color:#767B7A;"
-          "font-size:18px;"
+          "color:#3d3d3d;"
+          "font-size:20px;"
           "padding: 0px;"
         "}"
 
         //pumpSwitch
         ".pumpSwitch{"
           "color:#000;"
-          "font-size:22px;"
+          "font-size:24px;"
           "padding: 0px;"
-          "margin-bottom: 30px"
+          "margin-bottom: 30px;"
+          "margin-top: 70px;"
         "}"
         
         //pumpValues
         ".pumpValues{"
-         "color:#000;"
-         "font-size:45px;"
-         "font-weight: bold"
-         "background-color: #77777a"
-         "border: 1px 1px 1px 1px solid #77777a"
-         "-o-border-radius:1px 1px 1px;"
-         "-webkit-border-radius:1px 1px 1px;"
-         "border-radius: 50%"
+         "color:#fff;"
+         "font-size:60px;"
+         "padding: 40px;"
+         "font-weight: bold;"
+         "background-color:#77777a;"
+         "width: 80px;"
+         "margin: 20px auto;"
+         "border-radius: 50%;"
         "}"
-        
+ 
         ".on{"
           "background-color:#09004A;"
-          "padding: 20px 50px;"
+          "padding: 15px 40px;"
           "margin: 10px;"
           "color: #ffffff;"  
-          "font-size: 1.4em"   
+          "font-size: 1.4em;"   
         "}"
   
         ".off{"
           "background-color:#6B0000;"
-          "padding: 20px 50px;"
+          "padding: 15px 40px;"
           "margin: 10px;"
           "color: #ffffff;"
-          "font-size: 1.4em"
+          "font-size: 1.4em;"
         "}"
       
         //Powered by Maxim   
@@ -160,6 +162,7 @@ void handleRoot() {
         "a:visited {color:white;}"  /* visited link */
         "a:hover {color:white;}"  /* mouse over link */
         "a:active {color:white;}"  /* selected link */
+        
       "</style>"
     
       "<TITLE>Anco Pumps</TITLE>"
@@ -170,8 +173,10 @@ void handleRoot() {
         "<h2 class=\"dashboard\">Control DashBoard</h2>"
       "</div>"
       "<h1 class=\"pumpSpeed\">Pump Speed</h1>"
-      "<h1 class=\"pumpValues\" id=\"data\">"
-      "</h1>"
+      
+        "<h1 class=\"pumpValues\" id=\"data\">"
+        "</h1>"
+      
       "<h1 class=\"pumpSwitch\">Pump Switch</h1>"
       "<a href=\"/?pump=1\" class=\"on\">ON</a>"
       "<a href=\"/?pump=0\" class=\"off\">OFF</a>"
